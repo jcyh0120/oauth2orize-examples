@@ -1,13 +1,19 @@
-console.log("hello");
-
 angular.module('ionicApp', ['ionic'])
 
-.controller('MainCtrl', function($scope) {
+.controller('MainCtrl', function($scope,$http) {
 
-  $scope.devList = [
-    { text: "HTML5", checked: true },
-    { text: "CSS3", checked: false },
-    { text: "JavaScript", checked: false }
-  ];
+  $scope.login = function(){
+    var data = {
+        username:'bob',
+        password: 'secret'
+    };
+
+    $http.post('http://localhost:3000/login', data).then(function(result){
+        console.log("success");
+        
+    }, function(error){
+        console.error(error);
+    });
+  }
   
 });
