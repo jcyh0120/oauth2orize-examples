@@ -2,14 +2,20 @@
   "name": "oauth2orize-example",
   "version": "0.0.0",
   "dependencies": {
-    "express": "2.x.x",
+    "body-parser": "^1.15.2",
+    "connect": "^3.5.0",
+    "connect-ensure-login": "0.1.x",
+    "cookie-parser": "^1.4.3",
     "ejs": "0.7.x",
+    "errorhandler": "^1.5.0",
+    "express": "^4.14.0",
+    "morgan": "^1.7.0",
     "oauth2orize": "0.x.x",
     "passport": "~0.1.12",
-    "passport-local": "0.1.x",
     "passport-http": "0.2.x",
     "passport-http-bearer": "0.2.x",
+    "passport-local": "0.1.x",
     "passport-oauth2-client-password": "0.1.x",
-    "connect-ensure-login": "0.1.x"
+    "pug": "^2.0.0-beta6"
   }
 }

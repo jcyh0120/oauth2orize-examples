@@ -20,9 +20,9 @@ exports.logout = function(req, res) {
   res.redirect('/');
 }
 
-exports.account = [
-  login.ensureLoggedIn(),
-  function(req, res) {
-    res.render('account', { user: req.user });
-  }
-]
+// exports.account = [
+//   login.ensureLoggedIn(),
+//   function(req, res) {
+//     res.render('account', { user: req.user });
+//   }
+// ]
