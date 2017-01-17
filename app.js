@@ -20,8 +20,8 @@ var morgan = require('morgan')
 // Express configuration
   
 var app = express();
-app.set('view engine', 'pug');
-app.use(morgan('combined'));
+app.set('view engine', 'ejs');
+// app.use(morgan('combined'));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -46,7 +46,6 @@ app.use(passport.session());
 
 
 // Passport configuration
-
 require('./auth');
 
 
@@ -56,12 +55,12 @@ app.post('/login', site.login);
 app.get('/logout', site.logout);
 app.get('/account', site.account);
 
-// app.get('/dialog/authorize', oauth2.authorization);
-// app.post('/dialog/authorize/decision', oauth2.decision);
-// app.post('/oauth/token', oauth2.token);
+app.get('/dialog/authorize', oauth2.authorization);
+app.post('/dialog/authorize/decision', oauth2.decision);
+app.post('/oauth/token', oauth2.token);
 
-// app.get('/api/userinfo', user.info);
-// app.get('/api/clientinfo', client.info);
+app.get('/api/userinfo', user.info);
+app.get('/api/clientinfo', client.info);
 
 if ('development' == app.get('env')) {
   app.use(errorHandler());

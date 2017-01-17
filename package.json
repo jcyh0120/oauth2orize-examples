@@ -11,7 +11,7 @@
     "express": "^4.14.0",
     "morgan": "^1.7.0",
     "oauth2orize": "0.x.x",
-    "passport": "~0.1.12",
+    "passport": "~0.3.2",
     "passport-http": "0.2.x",
     "passport-http-bearer": "0.2.x",
     "passport-local": "0.1.x",

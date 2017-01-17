@@ -23,12 +23,12 @@ var server = oauth2orize.createServer();
 // simple matter of serializing the client's ID, and deserializing by finding
 // the client by ID from the database.
 
-server.serializeClient(function(client, done) {
+server.serializeClient(function (client, done) {
   return done(null, client.id);
 });
 
-server.deserializeClient(function(id, done) {
-  db.clients.find(id, function(err, client) {
+server.deserializeClient(function (id, done) {
+  db.clients.find(id, function (err, client) {
     if (err) { return done(err); }
     return done(null, client);
   });
@@ -48,10 +48,10 @@ server.deserializeClient(function(id, done) {
 // the application.  The application issues a code, which is bound to these
 // values, and will be exchanged for an access token.
 
-server.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, done) {
+server.grant(oauth2orize.grant.code(function (client, redirectURI, user, ares, done) {
   var code = utils.uid(16)
-  
-  db.authorizationCodes.save(code, client.id, redirectURI, user.id, function(err) {
+
+  db.authorizationCodes.save(code, client.id, redirectURI, user.id, function (err) {
     if (err) { return done(err); }
     done(null, code);
   });
@@ -63,13 +63,13 @@ server.grant(oauth2orize.grant.code(function(client, redirectURI, user, ares, do
 // the application.  The application issues a token, which is bound to these
 // values.
 
-server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
-    var token = utils.uid(256);
+server.grant(oauth2orize.grant.token(function (client, user, ares, done) {
+  var token = utils.uid(256);
 
-    db.accessTokens.save(token, user.id, client.clientId, function(err) {
-        if (err) { return done(err); }
-        done(null, token);
-    });
+  db.accessTokens.save(token, user.id, client.clientId, function (err) {
+    if (err) { return done(err); }
+    done(null, token);
+  });
 }));
 
 // Exchange authorization codes for access tokens.  The callback accepts the
@@ -78,14 +78,14 @@ server.grant(oauth2orize.grant.token(function(client, user, ares, done) {
 // application issues an access token on behalf of the user who authorized the
 // code.
 
-server.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, done) {
-  db.authorizationCodes.find(code, function(err, authCode) {
+server.exchange(oauth2orize.exchange.code(function (client, code, redirectURI, done) {
+  db.authorizationCodes.find(code, function (err, authCode) {
     if (err) { return done(err); }
     if (client.id !== authCode.clientID) { return done(null, false); }
     if (redirectURI !== authCode.redirectURI) { return done(null, false); }
-    
+
     var token = utils.uid(256)
-    db.accessTokens.save(token, authCode.userID, authCode.clientID, function(err) {
+    db.accessTokens.save(token, authCode.userID, authCode.clientID, function (err) {
       if (err) { return done(err); }
       done(null, token);
     });
@@ -97,34 +97,34 @@ server.exchange(oauth2orize.exchange.code(function(client, code, redirectURI, do
 // authorization request for verification. If these values are validated, the
 // application issues an access token on behalf of the user who authorized the code.
 
-server.exchange(oauth2orize.exchange.password(function(client, username, password, scope, done) {
+server.exchange(oauth2orize.exchange.password(function (client, username, password, scope, done) {
 
-    //Validate the client
-    db.clients.findByClientId(client.clientId, function(err, localClient) {
+  //Validate the client
+  db.clients.findByClientId(client.clientId, function (err, localClient) {
+    if (err) { return done(err); }
+    if (localClient === null) {
+      return done(null, false);
+    }
+    if (localClient.clientSecret !== client.clientSecret) {
+      return done(null, false);
+    }
+    //Validate the user
+    db.users.findByUsername(username, function (err, user) {
+      if (err) { return done(err); }
+      if (user === null) {
+        return done(null, false);
+      }
+      if (password !== user.password) {
+        return done(null, false);
+      }
+      //Everything validated, return the token
+      var token = utils.uid(256);
+      db.accessTokens.save(token, user.id, client.clientId, function (err) {
         if (err) { return done(err); }
-        if(localClient === null) {
-            return done(null, false);
-        }
-        if(localClient.clientSecret !== client.clientSecret) {
-            return done(null, false);
-        }
-        //Validate the user
-        db.users.findByUsername(username, function(err, user) {
-            if (err) { return done(err); }
-            if(user === null) {
-                return done(null, false);
-            }
-            if(password !== user.password) {
-                return done(null, false);
-            }
-            //Everything validated, return the token
-            var token = utils.uid(256);
-            db.accessTokens.save(token, user.id, client.clientId, function(err) {
-                if (err) { return done(err); }
-                done(null, token);
-            });
-        });
+        done(null, token);
+      });
     });
+  });
 }));
 
 // Exchange the client id and password/secret for an access token.  The callback accepts the
@@ -132,24 +132,24 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
 // authorization request for verification. If these values are validated, the
 // application issues an access token on behalf of the client who authorized the code.
 
-server.exchange(oauth2orize.exchange.clientCredentials(function(client, scope, done) {
+server.exchange(oauth2orize.exchange.clientCredentials(function (client, scope, done) {
 
-    //Validate the client
-    db.clients.findByClientId(client.clientId, function(err, localClient) {
-        if (err) { return done(err); }
-        if(localClient === null) {
-            return done(null, false);
-        }
-        if(localClient.clientSecret !== client.clientSecret) {
-            return done(null, false);
-        }
-        var token = utils.uid(256);
-        //Pass in a null for user id since there is no user with this grant type
-        db.accessTokens.save(token, null, client.clientId, function(err) {
-            if (err) { return done(err); }
-            done(null, token);
-        });
+  //Validate the client
+  db.clients.findByClientId(client.clientId, function (err, localClient) {
+    if (err) { return done(err); }
+    if (localClient === null) {
+      return done(null, false);
+    }
+    if (localClient.clientSecret !== client.clientSecret) {
+      return done(null, false);
+    }
+    var token = utils.uid(256);
+    //Pass in a null for user id since there is no user with this grant type
+    db.accessTokens.save(token, null, client.clientId, function (err) {
+      if (err) { return done(err); }
+      done(null, token);
     });
+  });
 }));
 
 // user authorization endpoint
@@ -170,8 +170,8 @@ server.exchange(oauth2orize.exchange.clientCredentials(function(client, scope, d
 
 exports.authorization = [
   login.ensureLoggedIn(),
-  server.authorization(function(clientID, redirectURI, done) {
-    db.clients.findByClientId(clientID, function(err, client) {
+  server.authorization(function (clientID, redirectURI, done) {
+    db.clients.findByClientId(clientID, function (err, client) {
       if (err) { return done(err); }
       // WARNING: For security purposes, it is highly advisable to check that
       //          redirectURI provided by the client matches one registered with
@@ -192,7 +192,7 @@ exports.authorization = [
     // Otherwise ask user
     done(null, false);
   }),
-  function(req, res){
+  function (req, res) {
     res.render('dialog', { transactionID: req.oauth2.transactionID, user: req.user, client: req.oauth2.client });
   }
 ]
@@ -206,7 +206,20 @@ exports.authorization = [
 
 exports.decision = [
   login.ensureLoggedIn(),
-  server.decision()
+  server.decision(function (req, done) {
+
+    if (req.body["cancel"]) {
+      console.log("here we set deny redirect url to facebook");
+      req.oauth2.redirectURI = "http://www.facebook.com";
+    } else {
+      console.log("here we set allow redirect url to google");
+      req.oauth2.redirectURI = "http://www.google.com";
+    }
+
+
+
+    return done(null, { scope: req.scope })
+  })
 ]
 
 
